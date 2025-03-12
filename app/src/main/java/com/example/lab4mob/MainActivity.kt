@@ -22,11 +22,7 @@ class MainActivity : BaseActivity() {
 
         val adapter = MealAdapter(mutableListOf()) { item ->
             val intent = Intent(this, Detail::class.java).apply {
-                putExtra("meal_name", item.strMeal)
-                putExtra("meal_area", item.strArea)
-                putExtra("meal_thumb", item.strMealThumb)
-                putExtra("meal_instructions", item.strInstructions)
-                putExtra("meal_category", item.strCategory)
+                putExtra("meal_id", item.idMeal) // Передаём только ID
             }
             startActivity(intent)
         }
@@ -36,9 +32,9 @@ class MainActivity : BaseActivity() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.state.collect { state ->
                     if (state.isLoading) {
-                        binding.result.text = "Грузим..."
+                        binding.result.text = getString(R.string.LoadingInMain)
                     } else if (state.error != null) {
-                        binding.result.text = "Ошибка: ${state.error}"
+                        binding.result.text = getString(R.string.MainActivError_main, state.error)
                     } else {
                         adapter.updateMeals(state.meals.toMutableList())
                         binding.result.text = ""
@@ -48,3 +44,4 @@ class MainActivity : BaseActivity() {
         }
     }
 }
+

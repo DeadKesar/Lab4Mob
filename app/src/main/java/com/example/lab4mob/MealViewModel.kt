@@ -42,28 +42,17 @@ class MealViewModel : ViewModel() {
             }
         }
     }
-    fun loadMealDetails(id: String) {
+
+    fun loadMealDetails(mealId: String) {
         viewModelScope.launch {
-            _state.value = _state.value.copy(isLoading = true)
+            _state.value = _state.value.copy(isLoading = true, selectedMeal = null)
             try {
-                val response = api.getMealById(id).await()
-                _state.value = _state.value.copy(
-                    selectedMeal = response.meals.firstOrNull(),
-                    isLoading = false,
-                    error = null
-                )
+                val response = api.getMealById(mealId).await()
+                val meal = response.meals.firstOrNull()
+                _state.value = _state.value.copy(selectedMeal = meal, isLoading = false)
             } catch (e: Exception) {
-                _state.value = _state.value.copy(
-                    error = e.message,
-                    isLoading = false
-                )
+                _state.value = _state.value.copy(error = e.message, isLoading = false)
             }
         }
-    }
-    fun selectMeal(meal: MealItem) {
-        _state.value = _state.value.copy(selectedMeal = meal)
-    }
-    override fun onCleared() {
-        super.onCleared()
     }
 }

@@ -1,13 +1,16 @@
 package com.example.lab4mob
 
 import android.os.Bundle
+import androidx.activity.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.example.lab4mob.databinding.DetailBinding
-
+import kotlinx.coroutines.launch
 
 
 class Detail : BaseActivity() {
     private lateinit var binding: DetailBinding
+    private val viewModel by viewModels<MealViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -15,19 +18,30 @@ class Detail : BaseActivity() {
         setContentView(binding.root)
         setupToolbar("Meal Details", showBackButton = true)
 
-        val mealName = intent.getStringExtra("meal_name") ?: "Unknown Meal"
-        val mealArea = intent.getStringExtra("meal_area") ?: "Unknown"
-        val mealThumb = intent.getStringExtra("meal_thumb")
-        val mealInstructions = intent.getStringExtra("meal_instructions") ?: "No instructions"
-        val mealCategory = intent.getStringExtra("meal_category") ?: "Unknown"
+        val mealId = intent.getStringExtra("meal_id")
+        if (mealId != null) {
+            viewModel.loadMealDetails(mealId)
+        }
 
-        binding.detailName.text = mealName
-        binding.detailStatus.text = getString(R.string.area2, mealArea)
-        binding.detailInstructions.text = mealInstructions.replace("\r\n", "\n")
-        mealThumb?.let { url ->
-            Glide.with(this)
-                .load(url.replace("\\/", "/"))
-                .into(binding.detailImage)
+        lifecycleScope.launch {
+            viewModel.state.collect { state ->
+                if (state.isLoading) {
+                    binding.detailName.text = getString(R.string.Detail_loading_text)
+                } else if (state.error != null) {
+                    binding.detailName.text = getString(R.string.Detail_fail_text, state.error)
+                } else {
+                    state.selectedMeal?.let { meal ->
+                        binding.detailName.text = meal.strMeal
+                        binding.detailStatus.text = getString(R.string.area2, meal.strArea ?: "ХЗ")
+                        binding.detailInstructions.text = meal.strInstructions?.replace("\r\n", "\n") ?: "Нет рецепта"
+                        meal.strMealThumb?.let { url ->
+                            Glide.with(this@Detail)
+                                .load(url.replace("\\/", "/"))
+                                .into(binding.detailImage)
+                        }
+                    }
+                }
+            }
         }
     }
 }

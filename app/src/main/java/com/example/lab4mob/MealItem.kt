@@ -1,7 +1,5 @@
 package com.example.lab4mob
 
-import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
 import com.google.gson.annotations.SerializedName
 import retrofit2.http.GET
 import retrofit2.http.Query
@@ -15,12 +13,11 @@ interface MealApi {
     fun getMealById(@Query("i") id: String): Call<MealResponse>
 }
 
+
 data class MealResponse(
     @SerializedName("meals") val meals: List<MealItem>
 )
 
-
-@Parcelize
 data class MealItem(
     @SerializedName("idMeal") val idMeal: String,
     @SerializedName("strMeal") val strMeal: String,
@@ -28,4 +25,4 @@ data class MealItem(
     @SerializedName("strMealThumb") val strMealThumb: String?,
     @SerializedName("strInstructions") val strInstructions: String?,
     @SerializedName("strCategory") val strCategory: String?
-) : Parcelable
+)
